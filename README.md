@@ -1,6 +1,11 @@
 # nicochcgi
 ニコニコチャンネルの自動キャッシュサーバー
 
+## 現在開発中です
+docker対応処理中です。
+現時点で動作はしません。
+しばらくお待ちください。
+
 ## About
 ニコニコチャンネルを監視して、ダウンロードするツールです。  
 ダウンロードスクリプトに管理用のcgi、API、プレイヤー、テレビ向けUI等含めます。
@@ -14,25 +19,8 @@
 
 ## How to use
 インストール方法
-1. nicochフォルダをApacheの公開フォルダ(/var/www/html/nicoch/とか)にコピーします。  
-```git clone https://github.com/nicocache/nicochcgi.git```とか。
-2. ユーザーを書き換えます。```sudo chown www-data:www-data *```とか。```chlist.*```の3ファイルはcgiが書き換えるので必須です。
-3. ```.htaccess```を書き換えます。間違えて外部からアクセスされると犯罪になりかねません。```.htaccess```が有効になるように設定するのも忘れないでください。外部公開するならBasic認証でも掛けておいてください。
-4. cgiに実行権限を付与します。```sudo chmod 755 *.cgi *.pl```。
-5. cgiが実行できるようにいろんな設定をします。
-6. cpanを使って依存ライブラリをインストールします。
-7. ```nicoch.conf```を書き換えてダウンロードフォルダを設定します。フォルダはhttpの公開フォルダ外で構いません。ただしcgiが読める場所で。
-  * 管理者パスワードが必要な場合は、nicochフォルダ内で``perl get_password.pl``でパスワード用設定を作成して貼り付けてください。
-8. ```/var/www-data/.netrc```にニコニコ動画のアカウントを登録します。パスワードを分けた別アカウントを作っておいた方が楽だと思います。.netrcは```chmod 600 .netrc```と```chown www-data:www-data .netrc```でアクセス権を変更してください。
-```
-machine nicovideo
-login foo@bar.com
-password your_pass
-```
-  * この設定は``nicovideo-dl -n``と共通です。
-9. 自動ダウンロードを設定します。```sudo -u www-data crontab -e```で```10 3 * * *  perl /var/www/html/nicoch/nico-anime.pl  2>&1 | tee -a ~/nicoch.log ```とか。エコノミーユーザーの場合は低画質の時間は避けましょう。そうでなくてもサーバー負荷を分散するようにするべきです。
-10. サムネイル作成用にダウンロードフォルダに``script/mkthumb.sh``を配置し同様にcrontabを設定します。
-11. ブラウザでアクセスしてみて適当にチャンネルを登録します。
+
+元々の手順は異様に長いですが、dockerを使えばかなり短くなるはずです。
 
 ## How to update
 アップデート方法
