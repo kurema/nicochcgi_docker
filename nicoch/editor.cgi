@@ -56,7 +56,7 @@ form {
 <textarea name="a1" class="fix-height fix-width">
 EOF
 
-open FILEIN, "<", "chlist.txt" or die "error";
+open FILEIN, "<", "/etc/nicochcgi/chlist.txt" or die "error";
 while(<FILEIN>){
 s/&/&amp;/g;
 s/</&lt;/g;

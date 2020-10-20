@@ -93,7 +93,7 @@ if($ENV{'REQUEST_METHOD'} eq "POST"){
   if($arg1=~ m!^https?://ch.nicovideo.jp/!){
    $arg1=~ s/[\n\r]//g;
    $arg1=~ s/\?[^\?]+$//;
-   open FILE, "+>>", "chlist.txt" or die "error";
+   open FILE, "+>>", "/etc/nicochcgi/chlist.txt" or die "error";
    flock(FILE, 2);
    my $AlreadyRegisterd=0;
    seek(FILE,0,0);
@@ -117,8 +117,8 @@ if($ENV{'REQUEST_METHOD'} eq "POST"){
   }
   return ("success",$message,"add");
  }elsif($op eq "del"){
-  open FILEIN, "<", "chlist.txt" or die "error";
-  open FILEBUP, ">", "chlist.bup" or die "error";
+  open FILEIN, "<", "/etc/nicochcgi/chlist.txt" or die "error";
+  open FILEBUP, ">", "/etc/nicochcgi/chlist.bup" or die "error";
   flock(FILEIN, 1);
   flock(FILEBUP, 2);
   my $result="";
@@ -135,15 +135,15 @@ if($ENV{'REQUEST_METHOD'} eq "POST"){
    }
   close(FILEIN);
   close(FILEBUP);
-  open FILEORG, ">", "chlist.txt" or die "error";
+  open FILEORG, ">", "/etc/nicochcgi/chlist.txt" or die "error";
   flock(FILEORG, 2);
   print FILEORG $result;
   close(FILEORG);
   return ("success",$message,"delete");
   }elsif($op eq "edit"){
   $message.="設定ファイルを書き換えました。\n";
-  open FILEORG, "<", "chlist.txt" or die "error";
-  open FILEBUP, ">", "chlist.bup" or die "error";
+  open FILEORG, "<", "/etc/nicochcgi/chlist.txt" or die "error";
+  open FILEBUP, ">", "/etc/nicochcgi/chlist.bup" or die "error";
   flock(FILEORG, 1);
   flock(FILEBUP, 2);
   while(my $t=<FILEORG>){
@@ -151,7 +151,7 @@ if($ENV{'REQUEST_METHOD'} eq "POST"){
    }
   close(FILEORG);
   close(FILEBUP);
-  open FILEORGOUT, ">", "chlist.txt" or die "error";
+  open FILEORGOUT, ">", "/etc/nicochcgi/chlist.txt" or die "error";
   flock(FILEORGOUT, 2);
   $arg1=~ s/\r\n/\n/g;
   print FILEORGOUT $arg1;

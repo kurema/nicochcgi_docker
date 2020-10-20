@@ -7,7 +7,7 @@ use Digest::SHA qw(sha256_hex);
 
 sub GetChannels{
   my @result;
-  my $chlist=File::Spec->catfile(dirname(__FILE__),"chlist.txt");
+  my $chlist="/etc/nicochcgi/chlist.txt";
   open(FILE,"<",$chlist);
   flock(FILE, 1);
   while(my $urlch =<FILE>){
