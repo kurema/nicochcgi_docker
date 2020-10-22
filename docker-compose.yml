@@ -1,0 +1,13 @@
+version: '3'
+services:
+
+  nicochcache:
+    image: nicochcgi
+    container_name: nicochcgi-server
+    ports: 
+      - 50001:80
+    volumes:
+      - ./config:/etc/nicochcgi
+      - ./config/.netrc:/var/www/.netrc
+      - ./videos:/media/niconico
+    

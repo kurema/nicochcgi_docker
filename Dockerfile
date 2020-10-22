@@ -10,9 +10,13 @@ ENV APACHE_RUN_DIR /var/run/apache2
 ENV APACHE_LOG_DIR /var/log/apache2
 ENV APACHE_LOCK_DIR /var/lock/apache2
 
+#You need to install tzdata first to prevent 'Please select the geographic area...' message.
 RUN apt-get update -y && \
     apt-get install -y tzdata
+
+#Timezone is set to Japan assuming you are in Japan.
 ENV TZ=Asia/Tokyo
+#Install dependencies.
 RUN apt-get install -y ffmpeg && \
     apt-get install -y apache2 && \
     apt-get install -y cpanminus && \
@@ -20,24 +24,37 @@ RUN apt-get install -y ffmpeg && \
     apt-get install -y libexpat1-dev && \
     apt-get clean && \
     rm -rf /var/cache/apt/archives/*
+#Enable cgi. This is cgi in 2020.
 RUN sed -ri 's/Options Indexes FollowSymLinks/Options Indexes FollowSymLinks ExecCGI/g;' /etc/apache2/apache2.conf && \
     echo "AddHandler cgi-script .cgi" >> /etc/apache2/apache2.conf && \
     a2enmod cgi.load && \
     echo "-- Apache2.conf --" && \
     cat /etc/apache2/apache2.conf
 
+#You need to touch if you want to mount a single file with `docker run -v`.
+#https://stackoverflow.com/questions/42248198/how-to-mount-a-single-file-in-a-volume
+RUN touch /var/www/.netrc && \
+    chmod 600 /var/www/.netrc && \
+    chown www-data:www-data /var/www/.netrc
+
+#Copy cpanfile first for better cache management.
+RUN touch /var/www/html/cpanfile
+COPY nicoch/cpanfile /var/www/html/cpanfile
+RUN cpanm --installdeps /var/www/html/
+
 COPY nicoch/ /var/www/html/
 RUN chmod 755 /var/www/html/*.cgi
 
-#COPY config/ /etc/nicochcgi/
-#RUN chown www-data:www-data /etc/nicochcgi/*
-
-RUN cpanm --installdeps /var/www/html/
+#/etc/nicochcgi/ should be overwritten using -v
+COPY config/ /etc/nicochcgi/
+RUN chown www-data:www-data /etc/nicochcgi/*
 
 EXPOSE 80
 CMD ["apachectl", "-D", "FOREGROUND"]
 
 #Reference
+#Docker! (jp)
+#https://tech-lab.sios.jp/archives/18811
 #Run apache cgi on Docker (jp)
 #https://senyoltw.hatenablog.jp/entry/2015/10/21/175847
 #Enable cgi for apache (jp)
@@ -47,7 +64,9 @@ CMD ["apachectl", "-D", "FOREGROUND"]
 #owner of Docker -v (jp)
 #https://qiita.com/yohm/items/047b2e68d008ebb0f001
 #https://tech-blog.rakus.co.jp/entry/20200826/docker
+#Docker+Cron (jp)
+#https://qiita.com/YuukiMiyoshi/items/bb7f14436d60d4bd8a8b
 
 #Note for Docker
-#>docker run -p 82:80 -d nicoch
-
+#>docker run -p 82:80 -d nicochcgi
+#>docker build -t nicochcgi .
