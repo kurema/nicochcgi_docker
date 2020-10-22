@@ -42,7 +42,7 @@ print <<"EOF";
 <body>
 EOF
 
-my %conf=GetConf("nicoch.conf");
+my %conf=GetConf("/etc/nicochcgi/nicoch.conf");
 my @dirs=glob $conf{"dlhome"}."/*";
 
 print "<h1>録画済み動画</h1>\n";

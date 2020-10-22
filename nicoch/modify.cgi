@@ -70,7 +70,7 @@ if($ENV{'REQUEST_METHOD'} eq "POST"){
   
  }
  
- my %conf=GetConf("nicoch.conf");
+ my %conf=GetConf("/etc/nicochcgi/nicoch.conf");
  my $q=new CGI;
  my $op=$q->param('op');
  my $arg1=$q->param('a1');

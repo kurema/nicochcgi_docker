@@ -9,7 +9,7 @@ require File::Spec->catfile(dirname(__FILE__),"common.pl");
 
 my %form=GetForm();
 
-my %conf=GetConf("nicoch.conf");
+my %conf=GetConf("/etc/nicochcgi/nicoch.conf");
 my @dirs=glob $conf{"dlhome"}."/*";
 
 foreach my $dir (@dirs){

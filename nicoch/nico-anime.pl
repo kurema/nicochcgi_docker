@@ -36,7 +36,7 @@ my $client = WWW::NicoVideo::Download->new(
     password => $nicopassword,
 );
 
-my %conf=GetConf(File::Spec->catfile(dirname(__FILE__),"nicoch.conf"));
+my %conf=GetConf(File::Spec->catfile(dirname(__FILE__),"/etc/nicochcgi/nicoch.conf"));
 my @url = GetChannels();
 
 my $animedir=$conf{"dlhome"};
