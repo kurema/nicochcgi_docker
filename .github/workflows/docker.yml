@@ -1,0 +1,28 @@
+name: Push Docker image to ECR
+
+# リモートブランチにプッシュされたらWorkflowが起動
+on: tag
+
+env:
+  # BuildKitを有効化
+  DOCKER_BUILDKIT: 1
+  IMAGE_NAME: nicochcgi
+  IMAGE_TAG: latest
+
+jobs:
+  build:
+    name: Build image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Login GitHub Registry
+        # 自動生成されるGITHUB_TOKENを使用する
+        run: docker login docker.pkg.github.com -u kurema -p ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build image
+        # `github.repository`で`owner/repository_name`が取得できる
+        run: docker build -t docker.pkg.github.com/${{ github.repository }}/${IMAGE_NAME}:${IMAGE_TAG} --file Dockerfile .
+
+      - name: Push image to GitHub Registry
+        run: docker push docker.pkg.github.com/${{ github.repository }}/${IMAGE_NAME}:${IMAGE_TAG}
