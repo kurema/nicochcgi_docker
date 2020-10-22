@@ -1,6 +1,8 @@
-name: Push Docker image to ECR
+name: Push Docker image to GitHub Package Registry
 
-# リモートブランチにプッシュされたらWorkflowが起動
+#https://qiita.com/homines22/items/6d28461d97906e42f57c
+
+#気楽にPushするので、tag時点で。
 on: tag
 
 env:
