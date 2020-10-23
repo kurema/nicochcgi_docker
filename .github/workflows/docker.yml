@@ -1,32 +1,92 @@
-name: Push Docker image to GitHub Package Registry
+name: Docker Container Build Workflow
 
-#https://qiita.com/homines22/items/6d28461d97906e42f57c
-
-#気楽にPushするので、tag時点で。
 on:
+  schedule:
+    - cron: '0 8 13 * *' # once a year
   push:
-    tags: '*'
+    branches: 
+      - main
+    tags:
+      - 'v*.*.*'
+  pull_request:
+    branches: 
+      - main
 
 env:
-  # BuildKitを有効化
-  DOCKER_BUILDKIT: 1
   IMAGE_NAME: nicochcgi
-  IMAGE_TAG: latest
 
 jobs:
-  build:
-    name: Build image
+  docker:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      -
+        name: Checkout
+        uses: actions/checkout@v2
 
-      - name: Login GitHub Registry
-        # 自動生成されるGITHUB_TOKENを使用する
-        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com -u kurema --password-stdin
+      - name: Prepare
+        id: prep
+        run: |
+          DOCKER_IMAGE=ghcr.io/${{ github.repository_owner }}/${IMAGE_NAME}/multi-arch
+          VERSION=edge
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/v}
+          fi
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            VERSION=monthly
+          fi
+          TAGS="${DOCKER_IMAGE}:${VERSION}"
+          if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+            TAGS="$TAGS,${DOCKER_IMAGE}:latest"
+          fi
+          echo ::set-output name=tags::${TAGS}
 
-      - name: Build image
-        # `github.repository`で`owner/repository_name`が取得できる
-        run: docker build -t docker.pkg.github.com/${{ github.repository }}/${IMAGE_NAME}:${IMAGE_TAG} --file Dockerfile .
+          # lowercase the branch name
+          BRANCH=$(echo ${GITHUB_REF##*/} | tr '[A-Z]' '[a-z]')
+          LABELS="org.opencontainers.image.revision=$GITHUB_SHA"
+          LABELS="$LABELS,org.opencontainers.image.created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          LABELS="$LABELS,org.opencontainers.image.version=$VERSION"
+          LABELS="$LABELS,com.github.repo.branch=$BRANCH"
+          LABELS="$LABELS,com.github.repo.dockerfile=Dockerfile"
+          echo ::set-output name=labels::${LABELS}
 
-      - name: Push image to GitHub Registry
-        run: docker push docker.pkg.github.com/${{ github.repository }}/${IMAGE_NAME}:${IMAGE_TAG}
+          BUILD_ARGS="BRANCH=$BRANCH"
+          echo ::set-output name=args::${BUILD_ARGS}
+
+      - name: Tag names
+        run: echo ${{ steps.prep.outputs.tags }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@master
+        with:
+          platforms: all
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@master
+
+      - name: Builder instance name
+        run: echo ${{ steps.buildx.outputs.name }}
+
+      - name: Available platforms
+        run: echo ${{ steps.buildx.outputs.platforms }}
+
+      - name: Login to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v1 
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PAT }}
+
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2-working-branch
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64,linux/386
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.prep.outputs.tags }}
+          build-args: ${{ steps.prep.outputs.args }}
+          labels: ${{ steps.prep.outputs.labels }}
