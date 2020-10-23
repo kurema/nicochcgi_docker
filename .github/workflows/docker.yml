@@ -4,7 +4,7 @@ name: Docker Container Build Workflow
 
 on:
   schedule:
-    - cron: '0 8 13 * *' # once a year
+    - cron: '0 8 13 * *' # once a month
   push:
     branches: 
       - main
@@ -16,6 +16,7 @@ on:
 
 env:
   IMAGE_NAME: nicochcgi
+  REPO_NAME: nicochcgi
 
 jobs:
   docker:
@@ -28,7 +29,7 @@ jobs:
       - name: Prepare
         id: prep
         run: |
-          DOCKER_IMAGE=ghcr.io/${{ github.repository_owner }}/${IMAGE_NAME}/multi-arch
+          DOCKER_IMAGE=ghcr.io/${{ github.repository_owner }}/${REPO_NAME}/${IMAGE_NAME}
           VERSION=edge
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/v}
