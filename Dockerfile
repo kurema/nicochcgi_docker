@@ -33,11 +33,6 @@ RUN sed -ri 's/Options Indexes FollowSymLinks/Options Indexes FollowSymLinks Exe
     echo "-- Apache2.conf --" && \
     cat /etc/apache2/apache2.conf
 
-#You need to touch if you want to mount a single file with `docker run -v`.
-#https://stackoverflow.com/questions/42248198/how-to-mount-a-single-file-in-a-volume
-RUN touch /root/.netrc && \
-    chmod 600 /root/.netrc\
-
 #Copy cpanfile first for better cache management.
 RUN touch /var/www/html/cpanfile
 COPY nicoch/cpanfile /var/www/html/cpanfile
