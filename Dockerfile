@@ -41,7 +41,8 @@ RUN touch /var/www/.netrc && \
 #Copy cpanfile first for better cache management.
 RUN touch /var/www/html/cpanfile
 COPY nicoch/cpanfile /var/www/html/cpanfile
-RUN cpanm --installdeps /var/www/html/
+RUN cpanm --installdeps --no-man-pages /var/www/html/  && \
+    rm -rf /root/.cpanm/work/*
 
 COPY nicoch/ /var/www/html/
 RUN chmod 755 /var/www/html/*.cgi /var/www/html/*.pl
