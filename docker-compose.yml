@@ -4,6 +4,7 @@ services:
   nicochcgi:
     image: ghcr.io/kurema/nicochcgi/nicochcgi:latest
     container_name: nicochcgi-server
+    restart: always
     ports: 
       - 50001:80
     volumes:
@@ -11,3 +12,8 @@ services:
       - ./config/.netrc:/var/www/.netrc
       - ./videos:/media/niconico
     
+# docker-compose up -d
+# docker-compose stop
+# docker-compose rm
+# docker-compose down
+# docker-compose down --rmi all
