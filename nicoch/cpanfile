@@ -1,4 +1,3 @@
-requires 'Net::Netrc';
 requires 'LWP::UserAgent';
 requires 'URI';
 requires 'URI::Escape';

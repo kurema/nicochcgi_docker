@@ -8,7 +8,7 @@ use URI;
 use WWW::NicoVideo::Download;
 use Web::Scraper;
 use XML::Simple;
-use Net::Netrc;
+#use Net::Netrc;
 
 use URI::Escape;
 use JSON;
@@ -36,7 +36,7 @@ print "Unlocked!\n";
 #    password => $nicopassword,
 #);
 
-my %conf=GetConf(File::Spec->catfile(dirname(__FILE__),"/etc/nicochcgi/nicoch.conf"));
+my %conf=GetConf("/etc/nicochcgi/nicoch.conf");
 my @url = GetChannels();
 
 my $client = WWW::NicoVideo::Download->new(
@@ -66,7 +66,10 @@ foreach my $url (@url) {
 
     my ($chid) = $url =~ m!/([^/]+?)/?$!;
     my $chdir=File::Spec->catfile($animedir , $chid );
-    if(! -d $chdir){mkdir $chdir;}
+    if(! -d $chdir){
+      mkdir $chdir;
+      chmod 0777, $chdir;
+    }
 
     foreach my $surl (@{$video->{url}},@{$video2->{url}}){
         my ($video_id) = $surl =~ m!/watch/(\w+)!;
@@ -141,7 +144,10 @@ foreach my $url (@url) {
           if($dl_downloaded == 0){
             die "Downloaded file empty.";
           }
-          else{rename $filetmp,$file;}
+          else{
+            chmod 0666,$filetmp;
+            rename $filetmp,$file;
+          }
         };
         sleep 10;
         if ($@) {
@@ -231,6 +237,7 @@ sub DownloadVideo{
       rmtree $dir_tmp;
     }
     mkdir $dir_tmp;
+    chmod 0777, $dir_tmp;
     
     my $m3u8_master_res = $ua->get($json_dsr->{data}->{session}->{content_uri});
 

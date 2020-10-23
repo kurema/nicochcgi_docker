@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-use Net::Netrc;
+#use Net::Netrc;
 use LWP::UserAgent;
 use URI::Escape;
 use CGI;
@@ -13,8 +13,12 @@ Access-Control-Allow-Origin: *
 
 HEAD
 
-my $mach = Net::Netrc->lookup('nicovideo');
-my ($nicologin, $nicopassword, $nicoaccount) = $mach->lpa;
+#my $mach = Net::Netrc->lookup('nicovideo');
+#my ($nicologin, $nicopassword, $nicoaccount) = $mach->lpa;
+
+my %conf=GetConf("/etc/nicochcgi/nicoch.conf");
+$nicologin = $conf{"niconico_id"};
+$nicopassword=$conf{"niconico_password"};
 
 my $login_info = {
     mail_tel => $nicologin,
