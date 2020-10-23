@@ -11,17 +11,18 @@ ENV APACHE_LOG_DIR /var/log/apache2
 ENV APACHE_LOCK_DIR /var/lock/apache2
 
 #You need to install tzdata first to prevent 'Please select the geographic area...' message.
+#https://sleepless-se.net/2018/07/31/docker-build-tzdata-ubuntu/
 RUN apt-get update -y && \
-    apt-get install -y tzdata
+    apt-get install -y --no-install-recommends tzdata
 
 #Timezone is set to Japan assuming you are in Japan.
 ENV TZ=Asia/Tokyo
 #Install dependencies.
-RUN apt-get install -y ffmpeg && \
-    apt-get install -y apache2 && \
-    apt-get install -y cpanminus && \
-    apt-get install -y build-essential && \
-    apt-get install -y libexpat1-dev && \
+RUN apt-get install -y --no-install-recommends ffmpeg \
+      apache2 \
+      cpanminus \
+      build-essential \
+      libexpat1-dev && \
     apt-get clean && \
     rm -rf /var/cache/apt/archives/*
 #Enable cgi. This is cgi in 2020.
@@ -43,7 +44,7 @@ COPY nicoch/cpanfile /var/www/html/cpanfile
 RUN cpanm --installdeps /var/www/html/
 
 COPY nicoch/ /var/www/html/
-RUN chmod 755 /var/www/html/*.cgi
+RUN chmod 755 /var/www/html/*.cgi /var/www/html/*.pl
 
 #/etc/nicochcgi/ should be overwritten using -v
 COPY config/ /etc/nicochcgi/
@@ -66,6 +67,8 @@ CMD ["apachectl", "-D", "FOREGROUND"]
 #https://tech-blog.rakus.co.jp/entry/20200826/docker
 #Docker+Cron (jp)
 #https://qiita.com/YuukiMiyoshi/items/bb7f14436d60d4bd8a8b
+#Docker+GitHub Actions+GitHub Package Registry (jp)
+#https://qiita.com/homines22/items/6d28461d97906e42f57c
 
 #Note for Docker
 #>docker run -p 82:80 -d nicochcgi

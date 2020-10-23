@@ -1,8 +1,8 @@
 version: '3'
 services:
 
-  nicochcache:
-    image: nicochcgi
+  nicochcgi:
+    image: ghcr.io/kurema/nicochcgi/nicochcgi:latest
     container_name: nicochcgi-server
     ports: 
       - 50001:80
