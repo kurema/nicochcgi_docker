@@ -9,7 +9,6 @@ services:
       - 50001:80
     volumes:
       - ./config:/etc/nicochcgi
-      - ./config/.netrc:/var/www/.netrc
       - ./videos:/media/niconico
     
 # docker-compose up -d

@@ -28,16 +28,21 @@ open(LOCK, File::Spec->catfile(dirname(__FILE__),"lock"));
 flock(LOCK, 2);
 print "Unlocked!\n";
 
-my $mach = Net::Netrc->lookup('nicovideo');
-my ($nicologin, $nicopassword, $nicoaccount) = $mach->lpa;
+#my $mach = Net::Netrc->lookup('nicovideo');
+#my ($nicologin, $nicopassword, $nicoaccount) = $mach->lpa;
 
-my $client = WWW::NicoVideo::Download->new(
-    email => $nicologin,
-    password => $nicopassword,
-);
+#my $client = WWW::NicoVideo::Download->new(
+#    email => $nicologin,
+#    password => $nicopassword,
+#);
 
 my %conf=GetConf(File::Spec->catfile(dirname(__FILE__),"/etc/nicochcgi/nicoch.conf"));
 my @url = GetChannels();
+
+my $client = WWW::NicoVideo::Download->new(
+    email => $conf{"niconico_id"},
+    password => $conf{"niconico_password"},
+);
 
 my $animedir=$conf{"dlhome"};
 #my $animedir=dirname(__FILE__)

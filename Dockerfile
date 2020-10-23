@@ -22,7 +22,8 @@ RUN apt-get install -y --no-install-recommends ffmpeg \
       apache2 \
       cpanminus \
       build-essential \
-      libexpat1-dev && \
+      libexpat1-dev \
+      libnet-ssleay-perl && \
     apt-get clean && \
     rm -rf /var/cache/apt/archives/*
 #Enable cgi. This is cgi in 2020.
@@ -34,14 +35,13 @@ RUN sed -ri 's/Options Indexes FollowSymLinks/Options Indexes FollowSymLinks Exe
 
 #You need to touch if you want to mount a single file with `docker run -v`.
 #https://stackoverflow.com/questions/42248198/how-to-mount-a-single-file-in-a-volume
-RUN touch /var/www/.netrc && \
-    chmod 600 /var/www/.netrc && \
-    chown www-data:www-data /var/www/.netrc
+RUN touch /root/.netrc && \
+    chmod 600 /root/.netrc\
 
 #Copy cpanfile first for better cache management.
 RUN touch /var/www/html/cpanfile
 COPY nicoch/cpanfile /var/www/html/cpanfile
-RUN cpanm --installdeps --no-man-pages /var/www/html/  && \
+RUN cpanm --installdeps --no-man-pages /var/www/html/ && \
     rm -rf /root/.cpanm/work/*
 
 COPY nicoch/ /var/www/html/
