@@ -54,6 +54,8 @@ $ sudo crontab -e
 * 標準で操作パスワードを追加
 * 設定を同一フォルダ内から``/etc/nicochcgi``に移動
 
+以上の違いだけで、Docker環境でなくとも概ね同様に使えます。
+
 ## アプリ
 ### [UWP版クライアント](https://www.microsoft.com/store/productId/9PFMPFTFX4W6)
 Windowsで利用できるUWP版のクライアントがあります。
