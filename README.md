@@ -5,6 +5,8 @@
 ニコニコチャンネルを監視して、ダウンロードするツールです。  
 ダウンロードスクリプトに管理用のcgi、API、プレイヤー、テレビ向けUI等含めます。
 
+[nicocache/nicochcgi](https://github.com/nicocache/nicochcgi)のDocker対応版で、現在こちらを主に開発しています。
+
 ## Demonstration
 * [メインページ](https://nicocache.github.io/nicoch/)
 * [TV向けUI](https://nicocache.github.io/nicoch/tv.html)
