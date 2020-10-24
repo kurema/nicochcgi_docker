@@ -13,21 +13,38 @@
 最新版とは限りません。静的サイト版。
 
 ## How to use
-[Packages](https://github.com/kurema/nicochcgi_docker/packages/469453)参照。
+1. セットアップ
+``` bash
+$ git pull https://github.com/kurema/nicochcgi_docker.git
+$ cd nicochcgi_docker
+$ sudo docker-compose up -d
+$ chown 666 config/*
+$ chown 777 videos/*.sh
+```
 
-1. Dockerで動かす。
-2. 設定を変更(パスワード編集)。
-3. crontabを組む。
+2. 基本設定
+``` bash
+$ sudo docker-compose exec nicochcgi perl /var/www/html/get_password.pl
+$ nano config/nicoch.conf
+```
 
-## play.html
-簡単なニコニコ動画のhtmlプレイヤーが含まれています(play.html)。  
-同様のニコニコ動画キャッシュサーバーを作る際には手軽なのでお勧めです。
+設定変更用パスワード・ニコニコ動画のアカウント情報を設定します。  
+設定変更用パスワードの初期値は``SyRDw3kGZ``です。  
+hls暗号化対応設定を自身の責任で確認してください。
 
-注意点
-1. play.htmlはCSSやjavascript含めてスタンドアローンです。
-2. コメント取得はサーバー側でプロキシを建てています。動画のやコメントプロキシのUrl指定部分は書き換えてください。
-3. コメント表示の挙動がいくらか異なります。簡易版と考えてください。またちょっと重いです。
-4. フォントサイズは基本的に実際より小さめにしています。現在としては公式のサイズは大きめだと個人的に思います。
+3. 自動ダウンロード
+``` bash
+$ sudo crontab -e
+```
+
+``` ctontab
+0 3 * * * docker-compose exec nicochcgi perl /var/www/html/nico-anime.pl && docker-compose exec nicochcgi perl /media/niconico/mkthumb.sh
+```
+
+4. その他
+
+* http://サーバー名:50001/ でアクセスできます。録画予約→一括編集、でキャッシュするチャンネルを登録します。
+* キャッシュフォルダを移動させる場合は、docker-compose.ymlを編集してください。その際、mkthumb.shもコピーしてください。
 
 ## Apps
 ### [UWP版クライアント](https://www.microsoft.com/store/productId/9PFMPFTFX4W6)

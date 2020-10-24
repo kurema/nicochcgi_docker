@@ -23,7 +23,13 @@ RUN apt-get install -y --no-install-recommends ffmpeg \
       cpanminus \
       build-essential \
       libexpat1-dev \
-      libnet-ssleay-perl && \
+#fix cpanm error...
+      liblwp-protocol-https-perl \
+      libnet-ssleay-perl \
+      libcrypt-ssleay-perl \
+      libio-socket-ssl-perl \
+      openssl \
+      libssl-dev && \
     apt-get clean && \
     rm -rf /var/cache/apt/archives/*
 #Enable cgi. This is cgi in 2020.
@@ -36,7 +42,7 @@ RUN sed -ri 's/Options Indexes FollowSymLinks/Options Indexes FollowSymLinks Exe
 #Copy cpanfile first for better cache management.
 RUN touch /var/www/html/cpanfile
 COPY nicoch/cpanfile /var/www/html/cpanfile
-RUN cpanm --installdeps --no-man-pages /var/www/html/ && \
+RUN cpanm --installdeps --no-man-pages -v /var/www/html/ && \
     rm -rf /root/.cpanm/work/*
 
 COPY nicoch/ /var/www/html/
