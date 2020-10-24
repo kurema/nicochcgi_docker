@@ -43,7 +43,8 @@ $ sudo crontab -e
 
 4. その他
 
-キャッシュフォルダを移動させる場合は、docker-compose.ymlを編集してください。その際、mkthumb.shもコピーしてください。
+* http://サーバー名:50001/ でアクセスできます。録画予約→一括編集、でキャッシュするチャンネルを登録します。
+* キャッシュフォルダを移動させる場合は、docker-compose.ymlを編集してください。その際、mkthumb.shもコピーしてください。
 
 ## Apps
 ### [UWP版クライアント](https://www.microsoft.com/store/productId/9PFMPFTFX4W6)
