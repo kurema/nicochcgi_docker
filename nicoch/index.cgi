@@ -58,8 +58,9 @@ foreach my $dir (@dirs){
     my @files=glob $dir."/*";
     foreach my $file (@files){
       next if ! -e $file;
+      next if -s $file == 0;
       my ($watchid,$title) = $file =~ m!/([^\./]+)\.(.+)\.[^\.]+$!;
-      next if $watchid == "tmp";
+      next if $watchid eq "tmp" || $watchid eq "";
       print "<a href='play.html\#$watchid\:$chid'>$title</a>";
       print "(<a href='https://www.nicovideo.jp/watch/$watchid'>org</a>)<br />\n";
     }
