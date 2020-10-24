@@ -13,11 +13,36 @@
 最新版とは限りません。静的サイト版。
 
 ## How to use
-[Packages](https://github.com/kurema/nicochcgi_docker/packages/469453)参照。
+1. セットアップ
+``` bash
+$ git pull https://github.com/kurema/nicochcgi_docker.git
+$ cd nicochcgi_docker
+$ sudo docker-compose up -d
+$ chown 666 config/*
+$ chown 777 videos/*.sh
+```
 
-1. Dockerで動かす。
-2. 設定を変更(パスワード編集)。
-3. crontabを組む。
+2. 基本設定
+``` bash
+$ sudo docker-compose exec nicochcgi perl /var/www/html/get_password.pl
+$ nano config/nicoch.conf
+```
+
+設定変更用パスワード・ニコニコ動画のアカウント情報を設定します。  
+hls暗号化対応設定を自身の責任で確認してください。
+
+3. 自動ダウンロード
+``` bash
+$ sudo crontab -e
+```
+
+``` ctontab
+0 3 * * * docker-compose exec nicochcgi perl /var/www/html/nico-anime.pl && docker-compose exec nicochcgi perl /media/niconico/mkthumb.sh
+```
+
+4. その他
+
+キャッシュフォルダを移動させる場合は、docker-compose.ymlを編集してください。その際、mkthumb.shもコピーしてください。
 
 ## play.html
 簡単なニコニコ動画のhtmlプレイヤーが含まれています(play.html)。  
