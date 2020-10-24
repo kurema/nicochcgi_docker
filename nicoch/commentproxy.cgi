@@ -6,6 +6,10 @@ use CGI;
 use Web::Scraper;
 use Unicode::Escape qw(escape unescape);
 use JSON;
+use File::Spec;
+use File::Basename;
+
+require File::Spec->catfile(dirname(__FILE__),"common.pl");
 
 print <<"HEAD";
 Content-type: application/xml
