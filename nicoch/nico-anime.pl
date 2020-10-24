@@ -115,7 +115,10 @@ foreach my $url (@url) {
         eval {
           my ($dl_size, $dl_downloaded, $is_hls) = DownloadVideo($info,$video_id,$chid,$client,0,$fh,$chdir,$conf{"support_hls_enc"});
           if($is_hls){
-            if(-e $filetmp){rename $filetmp,$file;}
+            if(-e $filetmp){
+              chmod 0666,$filetmp;
+              rename $filetmp,$file;
+            }
             return;
           }
           
