@@ -25,7 +25,7 @@ RUN apt-get install -y --no-install-recommends ffmpeg \
       libexpat1-dev \
       libnet-ssleay-perl \
 #      libcrypt-ssleay-perl \
-#      openssl \
+      openssl \
       libssl-dev && \
     apt-get clean && \
     rm -rf /var/cache/apt/archives/*
