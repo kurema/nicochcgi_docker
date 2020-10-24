@@ -6,9 +6,15 @@ services:
     container_name: nicochcgi-server
     restart: always
     ports: 
+      # Port for http
+      # HTTP用ポート
+      # DO NOT CHANGE ":80"
       - 50001:80
     volumes:
       - ./config:/etc/nicochcgi
+      # Video cache directory
+      # 動画キャッシュの保存場所
+      # DO NOT CHANGE ":/media/niconico"
       - ./videos:/media/niconico
     
 # docker-compose up -d
