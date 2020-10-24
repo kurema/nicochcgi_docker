@@ -24,8 +24,9 @@ RUN apt-get install -y --no-install-recommends ffmpeg \
       build-essential \
       libexpat1-dev \
       libnet-ssleay-perl \
-      libcrypt-ssleay-perl \
-      openssl && \
+#      libcrypt-ssleay-perl \
+#      openssl \
+      libssl-dev && \
     apt-get clean && \
     rm -rf /var/cache/apt/archives/*
 #Enable cgi. This is cgi in 2020.
