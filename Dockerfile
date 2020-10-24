@@ -23,8 +23,10 @@ RUN apt-get install -y --no-install-recommends ffmpeg \
       cpanminus \
       build-essential \
       libexpat1-dev \
+#fix cpanm error...
       libnet-ssleay-perl \
-#      libcrypt-ssleay-perl \
+      libcrypt-ssleay-perl \
+      libio-socket-ssl-perl \
       openssl \
       libssl-dev && \
     apt-get clean && \
