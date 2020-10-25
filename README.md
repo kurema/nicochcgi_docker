@@ -41,7 +41,7 @@ $ sudo crontab -e
 ```
 
 ``` ctontab
-0 3 * * * docker-compose exec nicochcgi perl /var/www/html/nico-anime.pl && docker-compose exec nicochcgi perl /media/niconico/mkthumb.sh
+0 3 * * * cd docker-composeの存在する場所 && docker-compose exec nicochcgi perl /var/www/html/nico-anime.pl && docker-compose exec nicochcgi perl /media/niconico/mkthumb.sh
 ```
 
 4. その他
