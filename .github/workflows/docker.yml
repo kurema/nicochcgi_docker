@@ -96,3 +96,4 @@ jobs:
           build-args: ${{ steps.prep.outputs.args }}
           labels: ${{ steps.prep.outputs.labels }}
           cache-from: type=registry,ref=${{ steps.prep.outputs.latest }}
+          cache-to: type=inline
