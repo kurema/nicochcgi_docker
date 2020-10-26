@@ -50,6 +50,10 @@ RUN chmod 755 /var/www/html/*.cgi /var/www/html/*.pl
 #/etc/nicochcgi/ should be overwritten using -v
 COPY config/ /etc/nicochcgi/
 RUN chown www-data:www-data /etc/nicochcgi/*
+RUN chmod 777 /etc/nicochcgi/*
+
+#I think document should be included.
+COPY README.md /
 
 EXPOSE 80
 CMD ["apachectl", "-D", "FOREGROUND"]

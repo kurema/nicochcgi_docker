@@ -41,7 +41,7 @@ $ sudo crontab -e
 ```
 
 ``` ctontab
-0 3 * * * docker-compose exec nicochcgi perl /var/www/html/nico-anime.pl && docker-compose exec nicochcgi perl /media/niconico/mkthumb.sh
+0 3 * * * cd docker-compose.ymlの存在する場所 && docker-compose exec -T nicochcgi perl /var/www/html/nico-anime.pl >> ログファイル 2>&1 && docker-compose exec -T nicochcgi perl /media/niconico/mkthumb.sh >> ログファイル 2>&1
 ```
 
 4. その他
@@ -53,6 +53,8 @@ $ sudo crontab -e
 * ニコニコアカウント情報がnicoch.conf内に移動
 * 標準で操作パスワードを追加
 * 設定を同一フォルダ内から``/etc/nicochcgi``に移動
+
+以上の違いだけで、Docker環境でなくとも概ね同様に使えます。
 
 ## アプリ
 ### [UWP版クライアント](https://www.microsoft.com/store/productId/9PFMPFTFX4W6)
