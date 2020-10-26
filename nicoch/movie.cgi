@@ -21,7 +21,7 @@ foreach my $dir (@dirs){
     foreach my $file (@files){
       next if ! -e $file;
       my ($watchid,$title,$ext) = $file =~ m!/([^\./]+)\.(.+)\.([^\.]+)$!;
-      next if $watchid == "tmp";
+      next if $watchid eq "tmp";
 
       if($watchid ne $form{"v"}){
         next;

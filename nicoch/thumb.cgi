@@ -23,7 +23,7 @@ foreach my $dir (@dirs){
       next if ! -e $file;
       my $thumb=$dir . "/thumbs/" . $watchid  . "." . $title . ".jpg";
       next if ! -e $thumb;
-      next if $watchid == "tmp";
+      next if $watchid eq "tmp";
 
       if($watchid ne $form{"v"}){
         next;
