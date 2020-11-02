@@ -21,8 +21,8 @@ $ git pull https://github.com/kurema/nicochcgi_docker.git
 $ cd nicochcgi_docker
 $ nano docker-compose.yml
 $ sudo docker-compose up -d
-$ chown 666 config/*
-$ chown 777 videos/*.sh
+$ chmod 666 config/*
+$ chmod 777 videos/*.sh
 ```
 
 2. 基本設定
