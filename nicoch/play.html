@@ -669,8 +669,11 @@
 	        
         let cmDuration=CommentDuration;
         let operatedComments=[];
+        let operatedNumber=[];
         for(let i=0;i<Comments.length;i++){
           let comment=Comments[i];
+          if(operatedNumber.includes(comment.count)){continue;}
+          else{operatedNumber.push(comment.count);}
           comment.lastDisplayed=0;
           let commentText=comment.text.replace(/\\/g,"\u29F5").replace(/\t/g,'　　 ');
           let commentLines=commentText.split('\n');
