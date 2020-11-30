@@ -34,7 +34,7 @@ RUN apt-get install -y --no-install-recommends ffmpeg \
 #Enable cgi. This is cgi in 2020.
 RUN sed -ri 's/Options Indexes FollowSymLinks/Options Indexes FollowSymLinks ExecCGI/g;' /etc/apache2/apache2.conf && \
     echo "AddHandler cgi-script .cgi" >> /etc/apache2/apache2.conf && \
-    a2enmod cgi.load && \
+    a2enmod cgid && \
     echo "-- Apache2.conf --" && \
     cat /etc/apache2/apache2.conf
 
