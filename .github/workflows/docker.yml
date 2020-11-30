@@ -46,6 +46,7 @@ jobs:
           fi
           echo ::set-output name=tags::${TAGS}
           echo "::set-output name=latest::${DOCKER_IMAGE}:latest"
+          echo "::set-output name=test::${DOCKER_IMAGE}:test"
 
           # lowercase the branch name
           BRANCH=$(echo ${GITHUB_REF##*/} | tr '[A-Z]' '[a-z]')
@@ -99,5 +100,5 @@ jobs:
           tags: ${{ steps.prep.outputs.tags }}
           build-args: ${{ steps.prep.outputs.args }}
           labels: ${{ steps.prep.outputs.labels }}
-          cache-from: type=registry,ref=${{ steps.prep.outputs.latest }}
+          cache-from: type=registry,ref=${{ steps.prep.outputs.test }}
           cache-to: type=inline
