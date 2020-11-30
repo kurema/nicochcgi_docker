@@ -46,7 +46,6 @@ jobs:
           fi
           echo ::set-output name=tags::${TAGS}
           echo "::set-output name=latest::${DOCKER_IMAGE}:latest"
-          echo "::set-output name=test::${DOCKER_IMAGE}:test"
 
           # lowercase the branch name
           BRANCH=$(echo ${GITHUB_REF##*/} | tr '[A-Z]' '[a-z]')
@@ -94,11 +93,10 @@ jobs:
           context: .
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/arm/v7
-#          platforms: linux/amd64,linux/arm64,linux/ppc64le,linux/arm/v7
 #          platforms: linux/amd64,linux/arm64,linux/arm/v7
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.prep.outputs.tags }}
           build-args: ${{ steps.prep.outputs.args }}
           labels: ${{ steps.prep.outputs.labels }}
-          cache-from: type=registry,ref=${{ steps.prep.outputs.test }}
+          cache-from: type=registry,ref=${{ steps.prep.outputs.latest }}
           cache-to: type=inline
