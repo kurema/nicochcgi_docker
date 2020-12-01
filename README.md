@@ -66,6 +66,9 @@ Windowsで利用できるUWP版のクライアントがあります。
 * [ストア](https://www.microsoft.com/store/productId/9PFMPFTFX4W6)
 * [プロジェクトページ](https://github.com/kurema/NicochViewerUWP)
 
+## スクリーンショット
+![](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/146467/e56f9df6-48ac-58af-e8f1-967b3d4790d6.png)
+
 ## 謝辞
 [Takumi Akiyama](https://github.com/akiym)様の[nico-anime.pl](https://gist.github.com/akiym/928802)がベースになっています。  
 感謝します。  
