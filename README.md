@@ -7,6 +7,8 @@
 
 [nicocache/nicochcgi](https://github.com/nicocache/nicochcgi)のDocker対応版で、現在こちらを主に開発しています。
 
+[Qiita記事](https://qiita.com/kurema/items/795f547a5c105b73b792)
+
 ## デモ
 * [メインページ](https://nicocache.github.io/nicoch/)
 * [TV向けUI](https://nicocache.github.io/nicoch/tv.html)
