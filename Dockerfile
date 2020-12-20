@@ -44,6 +44,8 @@ COPY nicoch/cpanfile /var/www/html/cpanfile
 RUN cpanm --installdeps --no-man-pages /var/www/html/ && \
     rm -rf /root/.cpanm/work/*
 
+RUN mkdir -p ${APACHE_RUN_DIR} && touch ${APACHE_RUN_DIR}/dummy
+
 COPY nicoch/ /var/www/html/
 RUN chmod 755 /var/www/html/*.cgi /var/www/html/*.pl
 
