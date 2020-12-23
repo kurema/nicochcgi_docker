@@ -62,7 +62,7 @@ RUN echo "#/bin/sh\nrm -f /var/run/apache2/cgisock.*\napachectl -D FOREGROUND" >
 
 EXPOSE 80
 #CMD ["apachectl", "-D", "FOREGROUND"]
-CMD ["/startup.sh"]
+CMD ["sh", "-c", "/startup.sh"]
 
 #Reference
 #Docker! (jp)
