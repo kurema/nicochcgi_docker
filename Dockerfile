@@ -57,7 +57,7 @@ RUN chmod 666 /etc/nicochcgi/*
 #I think document should be included.
 COPY README.md /
 
-RUN echo -e "#/bin/sh\nrm /var/run/apache2/cgisock.*\napachectl -D FOREGROUND" > /startup.sh && \
+RUN echo "#/bin/sh\nrm -f /var/run/apache2/cgisock.*\napachectl -D FOREGROUND" > /startup.sh && \
     chmod 777 /startup.sh
 
 EXPOSE 80
