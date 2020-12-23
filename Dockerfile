@@ -57,8 +57,11 @@ RUN chmod 666 /etc/nicochcgi/*
 #I think document should be included.
 COPY README.md /
 
+RUN echo -e "#/bin/sh\nrm /var/run/apache2/cgisock.*\napachectl -D FOREGROUND" > /startup.sh
+
 EXPOSE 80
-CMD ["apachectl", "-D", "FOREGROUND"]
+#CMD ["apachectl", "-D", "FOREGROUND"]
+CMD ["startup.sh"]
 
 #Reference
 #Docker! (jp)
