@@ -1,4 +1,6 @@
 # nicochcgi
+![Docker Container Build Workflow](https://github.com/kurema/nicochcgi_docker/workflows/Docker%20Container%20Build%20Workflow/badge.svg)
+
 ニコニコチャンネルの自動キャッシュサーバー
 
 ## 概要
