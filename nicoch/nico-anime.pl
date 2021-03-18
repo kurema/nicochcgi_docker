@@ -178,14 +178,15 @@ sub DownloadVideo{
   my $session_uri;
   my $json_dsr;
   my $is_hls=0;
-  if(defined($info) && defined($info->{video}->{dmcInfo}->{quality}->{videos}) && defined($info->{video}->{dmcInfo}->{session_api}->{videos})){
+  if(defined($info) && defined($info->{media}->{delivery}->{movie}->{session}->{videos})){
     $vurl = $info->{video}->{smileInfo}->{url};
-    if ($vurl=~ /low$/){die "low quality";}
-    if (@{$info->{video}->{dmcInfo}->{quality}->{videos}}+0 != @{$info->{video}->{dmcInfo}->{session_api}->{videos}}+0){die "low quality";}
+    if (defined($vurl) && $vurl=~ /low$/){die "low quality";}
+    #if (@{$info->{video}->{dmcInfo}->{quality}->{videos}}+0 != @{$info->{media}->{delivery}->{movie}->{session}->{videos}}+0){die "low quality";}
+    if($info->{media}->{delivery}->{movie}->{session}->{videos}[0] =~ /low$/){die "low quality";}
     ($json_dsr,$session_uri) = GetHtml5VideoJson($info, $client->user_agent);
     if(defined($json_dsr) && defined($json_dsr->{data}->{session}->{content_uri})){
       print "Access via api.dmc.nico\n";
-      if(defined($info->{video}->{dmcInfo}->{encryption})){
+      if(defined($info->{media}->{delivery}->{encryption})){
         $is_hls=1;
         print "Using HLS encrypted connection.\n";
       }
@@ -222,7 +223,7 @@ sub DownloadVideo{
       #以下を参考に。
       #https://github.com/tor4kichi/Hohoema/issues/778
       #これを正しくセットしないと動きません。
-      my $ping_uri="https://nvapi.nicovideo.jp/v1/2ab0cbaa/watch?t=".uri_escape($info->{video}->{dmcInfo}->{tracking_id});
+      my $ping_uri="https://nvapi.nicovideo.jp/v1/2ab0cbaa/watch?t=".uri_escape($info->{media}->{delivery}->{trackingId});
 
       my $request_option=HTTP::Request->new( "OPTIONS" , $ping_uri );
       $ua->request($request_option);
@@ -290,12 +291,13 @@ sub DownloadVideo{
     
     {
       open my $fh_hls_key_json, '>', File::Spec->catfile($dir_tmp,"hls_info.json") or die $!;
-      print {$fh_hls_key_json} encode_json($info->{video}->{dmcInfo}->{encryption});
+      print {$fh_hls_key_json} encode_json($info->{media}->{delivery}->{encryption});
       close($fh_hls_key_json);
     }
 
     my $last_ping = time;
-    my $hls_key_url = $info->{video}->{dmcInfo}->{encryption}->{hls_encryption_v1}->{key_uri};
+#    my $hls_key_url = $info->{media}->{delivery}->{encryption}->{key_uri};
+    my $hls_key_url = $info->{media}->{delivery}->{encryption}->{keyUri};
 
     foreach my $line (split(/\n/,$m3u8_playlist_res->content)){
       chomp($line);
@@ -456,8 +458,10 @@ sub GetInfo{
 
 sub GetHtml5VideoJson{
   my ($info,$ua) = @_;
-  if(!defined($info->{video}->{dmcInfo}->{session_api})){return;}
-  my $url=$info->{video}->{dmcInfo}->{session_api}->{urls}[0]->{url};
+  #if(!defined($info->{video}->{dmcInfo}->{session_api})){return;}
+  #my $url=$info->{video}->{dmcInfo}->{session_api}->{urls}[0]->{url};
+  if(!defined($info->{media}->{delivery}->{movie}->{session})){return;}
+  my $url=$info->{media}->{delivery}->{movie}->{session}->{urls}[0]->{url};
   my $dsr = GetDmcSessionRequest($info);
   my $res = $ua->post($url."?_format=json", Content => $dsr);
   my $json = decode_json($res->content);
@@ -480,20 +484,20 @@ sub GetDmcSessionRequest{
   
   my $protocol_parameters;
   
-  if(! defined($info->{video}->{dmcInfo}->{encryption})){
+  if(! defined($info->{media}->{delivery}->{encryption})){
     $protocol_parameters=<<"EOF";
             "http_output_download_parameters": {
-              "use_well_known_port": "@{[$info->{video}->{dmcInfo}->{session_api}->{urls}[0]->{is_well_known_port}==1?"yes":"no"]}",
-              "use_ssl": "@{[$info->{video}->{dmcInfo}->{session_api}->{urls}[0]->{is_ssl}==1?"yes":"no"]}",
+              "use_well_known_port": "@{[$info->{media}->{delivery}->{movie}->{session}->{urls}[0]->{isWellKnownPort}==1?"yes":"no"]}",
+              "use_ssl": "@{[$info->{media}->{delivery}->{movie}->{session}->{urls}[0]->{isSsl}==1?"yes":"no"]}",
               "transfer_preset": ""
             }
 EOF
   }else{
-    my $json_in=encode_json($info->{video}->{dmcInfo}->{encryption});
+    my $json_in=encode_json($info->{media}->{delivery}->{encryption});
     $protocol_parameters=<<"EOF";
             "hls_parameters": {
-              "use_well_known_port": "@{[$info->{video}->{dmcInfo}->{session_api}->{urls}[0]->{is_well_known_port}==1?"yes":"no"]}",
-              "use_ssl": "@{[$info->{video}->{dmcInfo}->{session_api}->{urls}[0]->{is_ssl}==1?"yes":"no"]}",
+              "use_well_known_port": "@{[$info->{media}->{delivery}->{movie}->{session}->{urls}[0]->{isWellKnownPort}==1?"yes":"no"]}",
+              "use_ssl": "@{[$info->{media}->{delivery}->{movie}->{session}->{urls}[0]->{isSsl}==1?"yes":"no"]}",
               "transfer_preset": "",
               "segment_duration": 5000,
               "encryption": ${json_in}
@@ -504,8 +508,8 @@ EOF
   return <<"EOF";
 {
   "session": {
-    "recipe_id": "@{[ EscapeJson($info->{video}->{dmcInfo}->{session_api}->{recipe_id}) ]}",
-    "content_id": "@{[ EscapeJson($info->{video}->{dmcInfo}->{session_api}->{content_id}) ]}",
+    "recipe_id": "@{[ EscapeJson($info->{media}->{delivery}->{movie}->{session}->{recipeId}) ]}",
+    "content_id": "@{[ EscapeJson($info->{media}->{delivery}->{movie}->{session}->{contentId}) ]}",
     "content_type": "movie",
     "content_src_id_sets": [
       {
@@ -514,12 +518,12 @@ EOF
             "src_id_to_mux": {
               "video_src_ids": [
                 "@{[ 
-join('", "',@{$info->{video}->{dmcInfo}->{session_api}->{videos}})
+join('", "',@{$info->{media}->{delivery}->{movie}->{session}->{videos}})
 ]}"
               ],
               "audio_src_ids": [
                 "@{[
-join('", "',@{$info->{video}->{dmcInfo}->{session_api}->{audios}})
+join('", "',@{$info->{media}->{delivery}->{movie}->{session}->{audios}})
 ]}"
               ]
             }
@@ -546,20 +550,20 @@ ${protocol_parameters}
     "content_uri": "",
     "session_operation_auth": {
       "session_operation_auth_by_signature": {
-        "token": "@{[ EscapeJson($info->{video}->{dmcInfo}->{session_api}->{token}) ]}",
-        "signature": "@{[ EscapeJson($info->{video}->{dmcInfo}->{session_api}->{signature}) ]}"
+        "token": "@{[ EscapeJson($info->{media}->{delivery}->{movie}->{session}->{token}) ]}",
+        "signature": "@{[ EscapeJson($info->{media}->{delivery}->{movie}->{session}->{signature}) ]}"
       }
     },
     "content_auth": {
       "auth_type": "ht2",
-      "content_key_timeout" : @{[ EscapeJson($info->{video}->{dmcInfo}->{session_api}->{content_key_timeout}) ]},
+      "content_key_timeout" : @{[ EscapeJson($info->{media}->{delivery}->{movie}->{session}->{contentKeyTimeout}) ]},
       "service_id": "nicovideo",
-      "service_user_id": "@{[ EscapeJson($info->{video}->{dmcInfo}->{session_api}->{service_user_id}) ]}"
+      "service_user_id": "@{[ EscapeJson($info->{media}->{delivery}->{movie}->{session}->{serviceUserId}) ]}"
     },
     "client_info": {
-      "player_id": "@{[ EscapeJson($info->{video}->{dmcInfo}->{session_api}->{player_id}) ]}"
+      "player_id": "@{[ EscapeJson($info->{media}->{delivery}->{movie}->{session}->{playerId}) ]}"
     },
-    "priority": @{[ EscapeJson($info->{video}->{dmcInfo}->{session_api}->{priority}) ]}
+    "priority": @{[ EscapeJson($info->{media}->{delivery}->{movie}->{session}->{priority}) ]}
   }
 }
 EOF
