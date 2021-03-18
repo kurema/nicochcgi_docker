@@ -42,12 +42,13 @@ my $info_json = scraper {
 $info_json = unescape($info_json);
 $info = decode_json( $info_json );
 
-my $ms= $info->{thread}->{serverUrl};
+#my $ms= $info->{thread}->{serverUrl};
+my $ms= $info->{comment}->{server}->{url};#"https://nmsg.nicovideo.jp/api/"
 #my $user_id= $info->{video}->{dmcInfo}->{user}->{user_id};
 my $user_id = $info->{viewer}->{id};
-my $user_key = $info->{context}->{userkey};
+my $user_key = $info->{comment}->{keys}->{userkey};
 my $length = $info->{video}->{duration};
-my $threads = $info->{commentComposite}->{threads};
+my $threads = $info->{comment}->{threads};
 
 my $min=int($length/60)+1;
 my $post_msg="<packet>\n";

@@ -242,9 +242,13 @@ function ShowComments(comments){
   
   var iframe=document.getElementById("player");
   var iframed = (iframe.contentWindow || iframe.contentDocument);
+  let operatedNumber=[];
 
   for(let comment_key in comments){
     let comment=comments[comment_key];
+    if(operatedNumber.includes(comment.count)){continue;}
+    else{operatedNumber.push(comment.count);}
+
     let div=document.createElement("div");
     div.classList.add("comment");
     div.id="comment_"+comment_key;
