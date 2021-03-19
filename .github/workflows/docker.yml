@@ -98,7 +98,9 @@ jobs:
           tags: ${{ steps.prep.outputs.tag_cache }}
           build-args: ${{ steps.prep.outputs.args }}
           labels: ${{ steps.prep.outputs.labels }}
-          cache-from: type=registry,ref=${{ steps.prep.outputs.tag_cache }}
+          cache-from: |-
+            type=registry,ref=${{ steps.prep.outputs.tag_cache }}
+            type=registry,ref=${{ steps.prep.outputs.latest }}
           cache-to: type=inline
 
       - name: Build and push
@@ -113,5 +115,7 @@ jobs:
           tags: ${{ steps.prep.outputs.tags }}
           build-args: ${{ steps.prep.outputs.args }}
           labels: ${{ steps.prep.outputs.labels }}
-          cache-from: type=registry,ref=${{ steps.prep.outputs.tag_cache }}
+          cache-from: |-
+            type=registry,ref=${{ steps.prep.outputs.tag_cache }}
+            type=registry,ref=${{ steps.prep.outputs.latest }}
           cache-to: type=inline
