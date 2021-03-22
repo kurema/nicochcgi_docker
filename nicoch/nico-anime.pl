@@ -174,7 +174,7 @@ sub DownloadVideo{
     sleep(1);
   }
 
-  my $vurl;
+  my $vurl="";
   my $session_uri;
   my $json_dsr;
   my $is_hls=0;
@@ -191,11 +191,13 @@ sub DownloadVideo{
         print "Using HLS encrypted connection.\n";
       }
       $vurl = $json_dsr->{data}->{session}->{content_uri};
+    }else{
+      die "Failed: https://api.dmc.nico/api/sessions\n";
     }
   }else{
     $vurl= $client->prepare_download($video_id);
   }
-  if ($vurl=~ /low$/){die "low quality";}
+  if ($vurl=~ /low$/){die "low quality!\n";}
 
   my $ping_content;
   if(defined($json_dsr)){
@@ -493,14 +495,19 @@ sub GetDmcSessionRequest{
             }
 EOF
   }else{
-    my $json_in=encode_json($info->{media}->{delivery}->{encryption});
+    #my $json_in=encode_json($info->{media}->{delivery}->{encryption});
     $protocol_parameters=<<"EOF";
             "hls_parameters": {
               "use_well_known_port": "@{[$info->{media}->{delivery}->{movie}->{session}->{urls}[0]->{isWellKnownPort}==1?"yes":"no"]}",
               "use_ssl": "@{[$info->{media}->{delivery}->{movie}->{session}->{urls}[0]->{isSsl}==1?"yes":"no"]}",
               "transfer_preset": "",
-              "segment_duration": 5000,
-              "encryption": ${json_in}
+              "segment_duration": 6000,
+              "encryption": {
+                "hls_encryption_v1": {
+                  "encrypted_key": "@{[$info->{media}->{delivery}->{encryption}->{encryptedKey}]}",
+                  "key_uri": "@{[$info->{media}->{delivery}->{encryption}->{keyUri}]}"
+                }
+              }
             }
 EOF
   }
