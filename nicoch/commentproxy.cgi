@@ -57,7 +57,7 @@ foreach my $thread (@$threads){
   if($thread->{isActive} == 1){
     my $thread_id = $thread->{id};
     if($thread->{isThreadkeyRequired} == 1){
-      my $thread_key_res=$ua->get("http://flapi.nicovideo.jp/api/getthreadkey?thread=".$thread->{id});
+      #my $thread_key_res=$ua->get("http://flapi.nicovideo.jp/api/getthreadkey?thread=".$thread->{id});
 
       #my $thread_key = ParseUrl($thread_key_res->content,"threadkey");
       #my $force_184 = ParseUrl($thread_key_res->content,"force_184");
