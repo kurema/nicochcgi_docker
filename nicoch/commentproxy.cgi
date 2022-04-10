@@ -43,10 +43,10 @@ $info_json = unescape($info_json);
 $info = decode_json( $info_json );
 
 #my $ms= $info->{thread}->{serverUrl};
-my $ms= $info->{comment}->{server}->{url};#"https://nmsg.nicovideo.jp/api/"
+my $ms= $info->{comment}->{server}->{url};#"https://nvcomment.nicovideo.jp/legacy/api/"
 #my $user_id= $info->{video}->{dmcInfo}->{user}->{user_id};
 my $user_id = $info->{viewer}->{id};
-my $user_key = $info->{comment}->{keys}->{userkey};
+my $user_key = $info->{comment}->{keys}->{userKey};
 my $length = $info->{video}->{duration};
 my $threads = $info->{comment}->{threads};
 
@@ -59,8 +59,10 @@ foreach my $thread (@$threads){
     if($thread->{isThreadkeyRequired} == 1){
       my $thread_key_res=$ua->get("http://flapi.nicovideo.jp/api/getthreadkey?thread=".$thread->{id});
 
-      my $thread_key = ParseUrl($thread_key_res->content,"threadkey");
-      my $force_184 = ParseUrl($thread_key_res->content,"force_184");
+      #my $thread_key = ParseUrl($thread_key_res->content,"threadkey");
+      #my $force_184 = ParseUrl($thread_key_res->content,"force_184");
+      my $thread_key = $thread->{threadkey};
+      my $force_184 = $thread->{is184Forced};
       
       $post_msg.=<<"PACKET"
  <thread thread="$thread_id" version="20090904" threadkey="$thread_key" force_184="$force_184" user_id="$user_id" />
