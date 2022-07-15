@@ -115,6 +115,12 @@ window.onload = function() {
   SetPlayerSize();
   ToggleRepeat();
   GetData(function(){SetId();PlayDefault();});
+
+  var iframe=document.getElementById("player");
+  var iframed = (iframe.contentWindow || iframe.contentDocument);
+  iframe.onload = function() {
+    FixKeyDown();
+  }
 };
 
 window.addEventListener('resize',function(event){
@@ -133,6 +139,12 @@ document.onkeydown = function (e){
   iframed.OnKeyDown(e.keyCode,e.key,function(){e.preventDefault();},e.shiftKey);
 };
 
+function FixKeyDown(){
+  var iframe=document.getElementById("player");
+  var iframed=(iframe.contentWindow || iframe.contentDocument);
+  iframed.document.onkeydown=function(e){};
+}
+      
 var VideoCount=0;
 var ChannelId;
 var Channels;
