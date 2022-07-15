@@ -117,7 +117,6 @@ window.onload = function() {
   GetData(function(){SetId();PlayDefault();});
 
   var iframe=document.getElementById("player");
-  var iframed = (iframe.contentWindow || iframe.contentDocument);
   iframe.onload = function() {
     FixKeyDown();
   }
