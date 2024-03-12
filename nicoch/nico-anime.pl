@@ -194,6 +194,9 @@ sub DownloadVideo{
     }else{
       die "Failed: https://api.dmc.nico/api/sessions\n";
     }
+  }elsif(defined($info) && defined($info->{media}->{domand})){
+    $is_hls=2;
+    print "Access via Dwango Media Service\n";
   }else{
     $vurl= $client->prepare_download($video_id);
   }
@@ -205,18 +208,59 @@ sub DownloadVideo{
   }
   if($is_hls==0){
     return DownloadFile($vurl,$client->user_agent,$fh,$range_from,$session_uri,$json_dsr->{data}->{session}->{id},$ping_content);
-  }else{
-    # Turn off/on next line to enable/disable HLS encryption.
-    if(! defined($support_HLS_enc) || $support_HLS_enc eq "false"){die "HLS encryption not supported.";}
+  }
+
+  # Turn off/on next line to enable/disable HLS encryption.
+  if(! defined($support_HLS_enc) || $support_HLS_enc eq "false"){die "HLS encryption not supported.";}
+  
+  my $dir_tmp = File::Spec->catfile($working_dir , $video_id.".hls/");
+  my $ua=$client->user_agent;
     
-    my $dir_tmp = File::Spec->catfile($working_dir , $video_id.".hls/");
-    my $ua=$client->user_agent;
-    
-    if(-e File::Spec->catfile($dir_tmp,"done")){
-      print "Already downloaded (Not converted.)\n";
-      return (0,0,1);
+  if(-e File::Spec->catfile($dir_tmp,"done")){
+    print "Already downloaded (Not converted.)\n";
+    return (0,0,1);
+  }
+  
+  my $m3u8_uri = "";
+  if($is_hls==2){
+    # https://github.com/AlexAplin/nndownload/blob/master/nndownload/nndownload.py
+    # Copyright (c) 2024 Alex Aplin
+    # MIT License
+    my $access_right_key = $info->{media}->{domand}->{accessRightKey};
+    my $watch_track_id = $info->{client}->{watchTrackId};
+
+    my @domand_videos = @{$info->{media}->{domand}->{videos}};
+    my $best_video_id = "video-h264-720p";
+    foreach my $domand_video (@domand_videos){
+      if($domand_video->{isAvailable}){
+        $best_video_id = $domand_video->{id};
+        last;
+      }
     }
+    my @domand_audios = @{$info->{media}->{domand}->{audios}};
+    my $best_audio_id = "audio-aac-192kbps";
+    foreach my $domand_audio (@domand_audios){
+      if($domand_audio->{isAvailable}){
+        $best_audio_id = $domand_audio->{id};
+        last;
+      }
+    }
+
+    my $dms_watch_api = "https://nvapi.nicovideo.jp/v1/watch/".$video_id."/access-rights/hls?actionTrackId=".uri_escape($watch_track_id);
+    my $request_option=HTTP::Request->new( "OPTIONS" , $dms_watch_api );
+    $ua->request($request_option);
     
+    my $request_post = HTTP::Request->new( "POST" , $dms_watch_api );
+    $request_post->header( "X-Access-Right-Key" => $access_right_key );
+    $request_post->header( "X-Request-With" => "https://www.nicovideo.jp" );
+    $request_post->header( "X-Frontend-Id" => "6" );
+    $request_post->header( "X-Frontend-Version" => "0" );
+    $request_post->header( "X-Niconico-Language" => "ja-jp" );
+    $request_post->content("{\"outputs\":[[\"".$best_video_id."\",\"".$best_audio_id."\"]]}"); #Predefined value is not very good.
+    my $manifest_res = decode_json($ua->request($request_post)->content);
+
+    $m3u8_uri = $manifest_res->{data}->{contentUrl}; # Url of m3u8
+  }else{
     #$ua->default_header( "Origin" => "https://www.nicovideo.jp" );
     #$ua->default_header( "Referer" => "https://www.nicovideo.jp/watch/$video_id" );
     #$ua->agent('Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36 Vivaldi/2.2.1388.37');
@@ -233,6 +277,7 @@ sub DownloadVideo{
       my $request_get=HTTP::Request->new( GET => $ping_uri );
       $request_get->header( "X-Frontend-Id" => "6" );
       $request_get->header( "X-Frontend-Version" => "0" );
+      $request_get->header( "X-Niconico-Language" => "ja-jp" );
       $request_get->header( "Origin" => "https://www.nicovideo.jp" );
       $request_get->header( "Referer" => "https://www.nicovideo.jp/watch/$video_id" );
       
@@ -240,7 +285,9 @@ sub DownloadVideo{
       if(decode_json($res->content)->{meta}->{status} ne "200"){
         print "Ping failed : $ping_uri\nContinue\n";
       }
+      $m3u8_uri = $json_dsr->{data}->{session}->{content_uri}
     }
+  }
     
     if(-d $dir_tmp){
       rmtree $dir_tmp;
@@ -248,10 +295,10 @@ sub DownloadVideo{
     mkdir $dir_tmp;
     chmod 0777, $dir_tmp;
     
-    my $m3u8_master_res = $ua->get($json_dsr->{data}->{session}->{content_uri});
+    my $m3u8_master_res = $ua->get($m3u8_uri);
 
     {
-      open my $fh_m3u8, '>', File::Spec->catfile($dir_tmp,GetFileName($json_dsr->{data}->{session}->{content_uri})) or die $!;
+      open my $fh_m3u8, '>', File::Spec->catfile($dir_tmp,GetFileName($m3u8_uri)) or die $!;
       print {$fh_m3u8} $m3u8_master_res->content;
       close($fh_m3u8);
     }
@@ -265,7 +312,7 @@ sub DownloadVideo{
         $m3u8_playlist = $line;
       }
       if(! defined($m3u8_playlist)){die "No playlist provided.";}
-      my $m3u8_master_dir=$json_dsr->{data}->{session}->{content_uri};
+      my $m3u8_master_dir=$m3u8_uri;
       $m3u8_master_dir=~ s/\/[^\/]+?$/\//;
       $m3u8_playlist = $m3u8_master_dir.$m3u8_playlist;
       $m3u8_playlist_local=File::Spec->catfile($dir_tmp,GetFileName($m3u8_playlist));
@@ -291,6 +338,7 @@ sub DownloadVideo{
     my $m3u8_playlist_dir = $m3u8_playlist;
     $m3u8_playlist_dir =~ s/\/[^\/]+?$/\//;
     
+    if($is_hls==1)
     {
       open my $fh_hls_key_json, '>', File::Spec->catfile($dir_tmp,"hls_info.json") or die $!;
       print {$fh_hls_key_json} encode_json($info->{media}->{delivery}->{encryption});
@@ -298,7 +346,7 @@ sub DownloadVideo{
     }
 
     my $last_ping = time;
-#    my $hls_key_url = $info->{media}->{delivery}->{encryption}->{key_uri};
+    #my $hls_key_url = $info->{media}->{delivery}->{encryption}->{keyUri};
     my $hls_key_url = $info->{media}->{delivery}->{encryption}->{keyUri};
 
     foreach my $line (split(/\n/,$m3u8_playlist_res->content)){
@@ -311,7 +359,11 @@ sub DownloadVideo{
           my $request=HTTP::Request->new( GET => $hls_key_url );
           $request->header( "Cache-Control" => "no-cache" );
           $request->header( "Pragma" => "no-cache" );
-          $request->header( "Referer" => "https://www.nicovideo.jp/watch/$video_id" );
+          if($is_hls==2){
+            $request->header( "Referer" => "https://www.nicovideo.jp/" );
+          }else{
+            $request->header( "Referer" => "https://www.nicovideo.jp/watch/$video_id" );
+          }
           my $hls_key_res=$ua->request( $request );
           
           open my $fh_hls_key, '>', File::Spec->catfile($dir_tmp,"hls.key") or die $!;
@@ -333,11 +385,15 @@ sub DownloadVideo{
         #my $ts_res = $ua->get($m3u8_playlist_dir.$line);
         my $request=HTTP::Request->new( GET => $m3u8_playlist_dir.$line );
         $request->header( "Origin" => "https://www.nicovideo.jp" );
-        $request->header( "Referer" => "https://www.nicovideo.jp/watch/$video_id" );
+        if($is_hls==2){
+          $request->header( "Referer" => "https://www.nicovideo.jp/" );
+        }else{
+          $request->header( "Referer" => "https://www.nicovideo.jp/watch/$video_id" );
+        }
         my $ts_res=$ua->request( $request );
         
         if (! $ts_res->is_success || $ts_res->header( "Content-Length" ) +0 != length($ts_res->content)) {
-          die "Download failure: ".$m3u8_playlist_dir.$line;
+          die "Download failure: ".$m3u8_playlist_dir."\n".$line;
         }
         
         #鍵はアクセスごとに変わる。
@@ -377,7 +433,7 @@ sub DownloadVideo{
     
     return (0,0,1);
   }
-}
+
 
 sub GetFileName{
   my ($file)=@_;
