@@ -434,6 +434,38 @@ sub DownloadVideo{
     return (0,0,1);
   }
 
+#https://github.com/kurema/nicochcgi_docker/blob/master/nicoch/nico-anime.pl
+sub DownloadM3u8{
+  my ($m3u8_uri,$m3u8_fn,$dir,$ua,$dir_tmp)=@_;
+  my $m3u8_res = $ua->get($m3u8_uri);
+  {
+    open my $fh_m3u8, '>', $m3u8_fn.".org" or die $!;
+    print {$fh_m3u8} $m3u8_res->content;
+    close($fh_m3u8);
+  }
+  foreach my $line (split(/\n/,$m3u8_res->content)){
+    if($line=~ /^\s*$/){
+      next;
+    }
+  }
+}
+
+sub GetM3u8Path{
+  my ($m3u8_uri,$dir_tmp)=@_;
+  my $filename_base=GetFileName($m3u8_uri);
+  my $fn_w_ex=$filename_base."m3u8";
+  my $i=0;
+  $filename_base=~ s/\..*?$//;
+  while(1){
+    my $fn_full=File::Spec->catfile($dir_tmp,$fn_w_ex);
+    if(-e $fn_full){
+      $fn_w_ex=$filename_base.".".$i."m3u8";
+      $i++;
+    }else{
+      return $fn_full;
+    }
+  }
+}
 
 sub GetFileName{
   my ($file)=@_;
