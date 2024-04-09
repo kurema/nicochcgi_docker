@@ -288,12 +288,23 @@ sub DownloadVideo{
       $m3u8_uri = $json_dsr->{data}->{session}->{content_uri}
     }
   }
-    
+
+  my $m3u8_playlist_local;
+
+  {
     if(-d $dir_tmp){
       rmtree $dir_tmp;
     }
     mkdir $dir_tmp;
     chmod 0777, $dir_tmp;
+  }   
+
+  if($is_hls==2){
+    my (undef,$m3u8_playlist_local_tmp)=GetM3u8Path($m3u8_uri,$dir_tmp);
+    $m3u8_playlist_local=$m3u8_playlist_local_tmp;
+    DownloadM3u8($m3u8_uri,$m3u8_playlist_local,$ua,$dir_tmp);
+    #return (0,0,1);
+  }else{
     
     my $m3u8_master_res = $ua->get($m3u8_uri);
 
@@ -304,7 +315,6 @@ sub DownloadVideo{
     }
     
     my $m3u8_playlist;
-    my $m3u8_playlist_local;
 
     {
       foreach my $line (split(/\n/,$m3u8_master_res->content)){
@@ -409,6 +419,7 @@ sub DownloadVideo{
         next;
       }
     }
+    }
     
     {
       open my $fh_done, '>', File::Spec->catfile($dir_tmp,"done") or die $!;
@@ -436,33 +447,84 @@ sub DownloadVideo{
 
 #https://github.com/kurema/nicochcgi_docker/blob/master/nicoch/nico-anime.pl
 sub DownloadM3u8{
-  my ($m3u8_uri,$m3u8_fn,$dir,$ua,$dir_tmp)=@_;
+  my ($m3u8_uri,$m3u8_fn,$ua,$dir_tmp)=@_;
   my $m3u8_res = $ua->get($m3u8_uri);
+#print "$m3u8_uri\n($m3u8_fn,$ua,$dir_tmp)\n";
   {
-    open my $fh_m3u8, '>', $m3u8_fn.".org" or die $!;
-    print {$fh_m3u8} $m3u8_res->content;
-    close($fh_m3u8);
+    open my $fh_m3u8_org, '>', $m3u8_fn.".org" or die $!;
+    print {$fh_m3u8_org} $m3u8_res->content;
+    close($fh_m3u8_org);
   }
+  open my $fh_m3u8, '>', $m3u8_fn or die $!;
   foreach my $line (split(/\n/,$m3u8_res->content)){
     if($line=~ /^\s*$/){
+      print {$fh_m3u8}  $line;
+      next;
+    }elsif($line=~ /^https?:\/\//i){
+      my $line_uri_bn=GetFileName($line);
+      chomp($line_uri_bn);
+      
+      if($line_uri_bn=~ /\.m3u8$/i){
+        my ($m3u8_path_relative,$m3u8_path)=GetM3u8Path($line,$dir_tmp);
+        DownloadM3u8($line,$m3u8_path,$ua,$dir_tmp);
+        print {$fh_m3u8} $m3u8_path_relative."\n";
+      }else{
+        DownloadBinary($line,File::Spec->catfile($dir_tmp,$line_uri_bn),$ua);
+        print {$fh_m3u8} $line_uri_bn."\n";
+      }
+      next;
+    }elsif($line=~ /URI=\"([^\"]+)\"/){
+      my $line_uri=$1;
+      my $line_uri_bn=GetFileName($line_uri);
+      if($line_uri_bn=~ /\.m3u8$/i){
+        my ($m3u8_path_relative,$m3u8_path)=GetM3u8Path($line_uri,$dir_tmp);
+        DownloadM3u8($line_uri,$m3u8_path,$ua,$dir_tmp);
+
+        my $uri_quote=quotemeta($line_uri);
+        $line=~ s/$uri_quote/$m3u8_path_relative/;
+        #ToDo: Can I used URI for local file? I don't know.
+        print {$fh_m3u8} $line."\n";
+      }else{
+        sleep(1);
+        DownloadBinary($line_uri,File::Spec->catfile($dir_tmp,$line_uri_bn),$ua);
+        my $uri_quote=quotemeta($line_uri);
+        $line=~ s/$uri_quote/$line_uri_bn/;
+        print {$fh_m3u8} $line."\n";
+      }
+      next;
+    }else{
+      print {$fh_m3u8} $line."\n";
       next;
     }
   }
+  close($fh_m3u8);
+}
+
+sub DownloadBinary{
+  my ($uri,$path,$ua)=@_;
+  my $binary_res=$ua->get($uri);
+  open my $fh_binary, '>', $path or die $!;
+  binmode($fh_binary);
+  print {$fh_binary} $binary_res->content;
+  close($fh_binary);
 }
 
 sub GetM3u8Path{
   my ($m3u8_uri,$dir_tmp)=@_;
   my $filename_base=GetFileName($m3u8_uri);
-  my $fn_w_ex=$filename_base."m3u8";
+  #$filename_base=~ s/\?.+$//;
+  $filename_base=~ s/\.\w+$//;
+  my $fn_w_ex=$filename_base.".m3u8";
   my $i=0;
   $filename_base=~ s/\..*?$//;
   while(1){
     my $fn_full=File::Spec->catfile($dir_tmp,$fn_w_ex);
+    #my $fn_full=$fn_w_ex;
     if(-e $fn_full){
-      $fn_w_ex=$filename_base.".".$i."m3u8";
+      $fn_w_ex=$filename_base.".".$i.".m3u8";
       $i++;
     }else{
-      return $fn_full;
+      return ($fn_w_ex,$fn_full);
     }
   }
 }
@@ -471,6 +533,8 @@ sub GetFileName{
   my ($file)=@_;
   $file =~ s/\?[^\?]+$//;
   $file =~ s/^.+\///;
+#Added - may corrupt
+  $file =~ s/\?.+$//;
   return $file;
 }
 
