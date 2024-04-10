@@ -74,3 +74,5 @@ Windowsで利用できるUWP版のクライアントがあります。
 ## 謝辞
 [Takumi Akiyama](https://github.com/akiym)様の[nico-anime.pl](https://gist.github.com/akiym/928802)がベースになっています。  
 感謝します。  
+
+2024年の仕様変更対応では[AlexAplin](https://github.com/AlexAplin)様の[nndownload](https://github.com/AlexAplin/nndownload)を参照させていただきました。感謝いたします。
