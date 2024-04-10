@@ -72,7 +72,7 @@ Windowsで利用できるUWP版のクライアントがあります。
 ![](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/146467/e56f9df6-48ac-58af-e8f1-967b3d4790d6.png)
 
 ## 謝辞
-[Takumi Akiyama](https://github.com/akiym)様の[nico-anime.pl](https://gist.github.com/akiym/928802)がベースになっています。  
+[Takumi Akiyama](https://github.com/akiym)様の[nico-anime.pl](https://gist.github.com/akiym/928802) (削除済み)がベースになっています。  
 感謝します。  
 
 2024年の仕様変更対応では[AlexAplin](https://github.com/AlexAplin)様の[nndownload](https://github.com/AlexAplin/nndownload)を参照させていただきました。感謝いたします。
