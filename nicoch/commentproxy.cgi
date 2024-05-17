@@ -12,7 +12,7 @@ use File::Basename;
 require File::Spec->catfile(dirname(__FILE__),"common.pl");
 
 print <<"HEAD";
-Content-type: application/xml
+Content-type: application/json
 Access-Control-Allow-Origin: *
 
 HEAD
@@ -31,9 +31,11 @@ my $login_info = {
 
 my $q=new CGI;
 my $movie_id=$q->param('id');
+#my $movie_id="DEBUG";
 
 my $ua = LWP::UserAgent->new(cookie_jar => {});
 $ua->post("https://secure.nicovideo.jp/secure/login?site=niconico", $login_info);
+
 
 my $info_res = $ua->get("https://www.nicovideo.jp/watch/".$movie_id);
 my $info_json = scraper {
@@ -42,50 +44,30 @@ my $info_json = scraper {
 $info_json = unescape($info_json);
 $info = decode_json( $info_json );
 
-#my $ms= $info->{thread}->{serverUrl};
-my $ms= $info->{comment}->{server}->{url};#"https://nvcomment.nicovideo.jp/legacy/api/"
-#my $user_id= $info->{video}->{dmcInfo}->{user}->{user_id};
-my $user_id = $info->{viewer}->{id};
-my $user_key = $info->{comment}->{keys}->{userKey};
-my $length = $info->{video}->{duration};
-my $threads = $info->{comment}->{threads};
+my $threadsUrl = ($info->{comment}->{nvComment}->{server})."/v1/threads";
 
-my $min=int($length/60)+1;
-my $post_msg="<packet>\n";
+my $post_msg=$info->{comment}->{nvComment};
+delete $post_msg->{server};
+my %emptyHash=();
+$post_msg->{additionals}=\%emptyHash;
 
-foreach my $thread (@$threads){
-  if($thread->{isActive} == 1){
-    my $thread_id = $thread->{id};
-    if($thread->{isThreadkeyRequired} == 1){
-      #my $thread_key_res=$ua->get("http://flapi.nicovideo.jp/api/getthreadkey?thread=".$thread->{id});
+#DEBUG!
+#print $threadsUrl;
+#print "\n";
+#print encode_json($post_msg);
+#print "\n";
 
-      #my $thread_key = ParseUrl($thread_key_res->content,"threadkey");
-      #my $force_184 = ParseUrl($thread_key_res->content,"force_184");
-      my $thread_key = $thread->{threadkey};
-      my $force_184 = $thread->{is184Forced};
-      
-      $post_msg.=<<"PACKET"
- <thread thread="$thread_id" version="20090904" threadkey="$thread_key" force_184="$force_184" user_id="$user_id" />
- <thread_leaves scores="1" thread="$thread_id" threadkey="$thread_key" force_184="$force_184" user_id="$user_id">0-$min:100,1000</thread_leaves>
-PACKET
-    }else{
-      $post_msg.=" <thread thread=\"$thread_id\" version=\"20061206\" res_from=\"-1000\" user_id=\"$user_id\" userkey=\"$user_key\" />\n";
-      if($thread->{isLeafRequired} == 1){
-        $post_msg.=" <thread_leaves scores=\"1\" thread=\"$thread_id\" user_id=\"$user_id\" userkey=\"$user_key\">0-$min:100,1000</thread_leaves>\n";
-      }
-    }
-  }
-}
+my $request_option=HTTP::Request->new( "OPTIONS" , $threadsUrl );
+$request_option->header( "Origin" => "https://www.nicovideo.jp" );
+$request_option->header( "Referer" => "https://www.nicovideo.jp/" );
+$ua->request($request_option);
 
-$post_msg.="</packet>\n";
-
-my $req=HTTP::Request->new(POST => $ms);
-$req->content($post_msg);
+my $req=HTTP::Request->new(POST => $threadsUrl);
+$req->header( "Origin" => "https://www.nicovideo.jp" );
+$req->header( "Referer" => "https://www.nicovideo.jp/" );
+$req->header( "x-client-os-type" => "others" );
+$req->header( "x-frontend-id" => "6" );
+$req->header( "x-frontend-version" => "0" );
+$req->content(encode_json($post_msg));
 print $ua->request($req)->content;
 
-sub ParseUrl{
-  my $text=$_[0];
-  my $key=$_[1];
-  my ($res) = $text=~ m/$key\=([^\&]+)/;
-  return uri_unescape($res);
-}

@@ -77,7 +77,7 @@ a {color:white;text-decoration: none;}
           <a href=".">Home</a>
           <a href="tv.html">TV Home</a>
           <a href="play.html" onclick="OpenVideoPage();return false;">単体ビュワー</a>
-          <a href="https://www.nicovideo.jp/watch/" onclick="OpenVideoPageNicovideo();return false;">公式</a>
+          <a id="linkNicovideo" href="https://www.nicovideo.jp/watch/" onclick="OpenVideoPageNicovideo();return false;">公式</a>
         </div>
         <div id="comments"></div>
       </div>
@@ -117,6 +117,7 @@ window.onload = function() {
   GetData(function(){SetId();PlayDefault();});
 
   var iframe=document.getElementById("player");
+  var iframed = (iframe.contentWindow || iframe.contentDocument);
   iframe.onload = function() {
     FixKeyDown();
   }
@@ -403,6 +404,7 @@ function Play(count){
   if(targetCount==-1) return;
   VideoCount=targetCount;
   let video=currentChannel.videos[targetCount];
+  document.getElementById("linkNicovideo").href="https://www.nicovideo.jp/watch/"+video.id;
   PlayUrl(video.player_url+repeatFooter);
   SetHash(currentChannel.channel_id,video.id);
   SetInfo(video);

@@ -263,7 +263,7 @@
         
         if(CommentSource!=comment_org){
           GetChatXML(function(xml) {
-            Comments=ParseComment(xml);
+            Comments=ParseCommentJson(xml);
             NotifyCommentUpdate(Comments);
             if(CommentTimer){clearInterval(CommentTimer);}
             CommentTimer=setInterval('DrawComment()', 1000.0/Fps);
@@ -944,7 +944,46 @@ testContext.stroke();
       function CheckY(fontHeight,y1,y2,lineCnt1,lineCnt2){
         return y1-fontHeight*(lineCnt2-0.5) < y2 && y2-fontHeight*(lineCnt1-0.5) < y1;
       }
+      function ParseCommentJson(json){
+        let result=[];
+        const commentObj=JSON.parse(json);
+        let chat=function(text,vpos,mail,cnt,unixtime){
+            this.text=text;
+            this.vpos=vpos;
+            if(mail!=null){
+              this.mail=mail.toLowerCase();
+            }else{
+              this.mail="";
+            }
+            this.count=cnt;
+            this.lastY=-1;
+            this.width=-1;
+            this.lastCnt=-1;
+            this.fontScale=-1;
+            //for contextmenu
+            this.lastYReal=-1;
+            this.lastX=-1;
+            this.lastWidth=-1;
+            this.lastDisplayed=0;
+            this.lastHeight=-1;
+            //for info
+            this.date=new Date(unixtime);
+        }
+        for(let i=0; i<commentObj.data.threads.length; i++){
+          const thread = commentObj.data.threads[i];
+          for(let j=0; j<thread.comments.length; j++){
+            const comment = thread.comments[j];
+            result.push(new chat(comment.body,comment.vposMs,comment.commands.join(' '),comment.no,comment.postedAt));
+          }
+        }
+        result.sort(function(a,b){
+          if(a.vpos==b.vpos){return a.count>b.count?1:-1;}
+          return a.vpos-b.vpos;
+        });
+        return result;
+      }
       function ParseComment(xml){
+        //This function is obsolete. It's not used anymore.
         let result=[];
         let parser = new DOMParser();
         let dom=parser.parseFromString(xml, 'text/xml');
