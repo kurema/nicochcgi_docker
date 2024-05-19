@@ -41,7 +41,7 @@ RUN sed -ri 's/Options Indexes FollowSymLinks/Options Indexes FollowSymLinks Exe
 #Copy cpanfile first for better cache management.
 RUN touch /var/www/html/cpanfile
 COPY nicoch/cpanfile /var/www/html/cpanfile
-RUN cpanm --installdeps --no-man-pages /var/www/html/ && \
+RUN cpanm --installdeps --no-man-pages /var/www/html/ || \
     cpanm --installdeps --no-man-pages --verbose /var/www/html/ && \
     rm -rf /root/.cpanm/work/*
 
