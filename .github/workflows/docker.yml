@@ -87,13 +87,12 @@ jobs:
           password: ${{ secrets.GHCR_PAT }}
 
       - name: Build cache and push 1
-        id: docker_build_cache
+        id: docker_build_cache1
         uses: docker/build-push-action@v2
         with:
           builder: ${{ steps.buildx.outputs.name }}
           context: .
           file: ./Dockerfile
-#          platforms: linux/amd64,linux/arm64,linux/arm/v7
           platforms: linux/amd64
           push: true
           tags: ${{ steps.prep.outputs.tag_cache }}
@@ -103,16 +102,49 @@ jobs:
             type=registry,ref=${{ steps.prep.outputs.tag_cache }}
             type=registry,ref=${{ steps.prep.outputs.latest }}
           cache-to: type=inline
-          
-      - name: Build cache and push
+         
+      - name: Build cache and push 2
         id: docker_build_cache2
         uses: docker/build-push-action@v2
         with:
           builder: ${{ steps.buildx.outputs.name }}
           context: .
           file: ./Dockerfile
-#          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.prep.outputs.tag_cache }}
+          build-args: ${{ steps.prep.outputs.args }}
+          labels: ${{ steps.prep.outputs.labels }}
+          cache-from: |-
+            type=registry,ref=${{ steps.prep.outputs.tag_cache }}
+            type=registry,ref=${{ steps.prep.outputs.latest }}
+          cache-to: type=inline
+          
+      - name: Build cache and push 3
+        id: docker_build_cache3
+        uses: docker/build-push-action@v2
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          context: .
+          file: ./Dockerfile
           platforms: linux/amd64,linux/arm64,linux/arm/v7
+          push: true
+          tags: ${{ steps.prep.outputs.tag_cache }}
+          build-args: ${{ steps.prep.outputs.args }}
+          labels: ${{ steps.prep.outputs.labels }}
+          cache-from: |-
+            type=registry,ref=${{ steps.prep.outputs.tag_cache }}
+            type=registry,ref=${{ steps.prep.outputs.latest }}
+          cache-to: type=inline
+
+      - name: Build cache and push 4
+        id: docker_build_cache4
+        uses: docker/build-push-action@v2
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64,linux/arm/v7,linux/ppc64le
           push: true
           tags: ${{ steps.prep.outputs.tag_cache }}
           build-args: ${{ steps.prep.outputs.args }}
