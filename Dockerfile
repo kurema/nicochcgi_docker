@@ -41,8 +41,13 @@ RUN sed -ri 's/Options Indexes FollowSymLinks/Options Indexes FollowSymLinks Exe
 #Copy cpanfile first for better cache management.
 RUN touch /var/www/html/cpanfile
 COPY nicoch/cpanfile /var/www/html/cpanfile
-RUN cpanm --installdeps --no-man-pages /var/www/html/ || \
-    cpanm --installdeps --no-man-pages --verbose /var/www/html/ && \
+#RUN cpanm --installdeps --no-man-pages /var/www/html/ || \
+#    cpanm --installdeps --no-man-pages --verbose /var/www/html/ && \
+#    rm -rf /root/.cpanm/work/*
+
+# cpanm fails wihout --verbose (Installing JSON failed - )
+#Building and testing JSON-4.10 ... ! Timed out (> 1800s). Use --verbose to retry
+RUN cpanm --installdeps --no-man-pages --verbose /var/www/html/ && \
     rm -rf /root/.cpanm/work/*
 
 RUN mkdir -p ${APACHE_RUN_DIR} && touch ${APACHE_RUN_DIR}/dummy
